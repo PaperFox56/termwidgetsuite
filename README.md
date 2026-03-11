@@ -1,63 +1,13 @@
 # termwidgetsuite
 
-My attempt at creating a terminal based widget suite — a small collection of C source files for drawing monochrome bitmap-style output in a terminal and a few example programs (clock, etc.). The project provides a minimal framebuffer-like API (teye) and utilities to render it using ANSI colors.
+My attempt at creating a terminal based widget suite, a small collection of C source files for drawing monochrome bitmap-style output in a terminal and a few example programs (clock, etc.). The project uses the Teye library, developped and maintained by me (github/PaperFox56/teye).
 
 ## Contents
 
-- src/teye.c, src/teye.h — core framebuffer and terminal render code (TEYE_* API)
 - src/timer.c, src/timer.h — small cross-platform timing helpers
 - src/clock.c — example program that draws a 7-segment-style clock into the TEYE buffer and renders it
-- bin/ — output directory for compiled binaries (not present in repository; created at build time)
-
-## Features
-
-- Minimal framebuffer API for terminal rendering (TEYE_init, TEYE_render_frame_mode_1/2, TEYE_clear_buffer, TEYE_free)
-- Two rendering modes (character-based color blocks and foreground/background blended characters)
-- Example: a terminal 7-segment clock (src/clock.c)
 
 ## Requirements
 
 - C compiler (gcc/clang)
 - POSIX-compatible terminal (Linux, macOS). Windows may work but is untested.
-
-## Build and run
-
-1. Create the bin directory (if it does not exist):
-
-   ```mkdir -p bin```
-
-2. Use Make
-
-   ```make```
-
-will build the library and put the file `teye.a` in the `bin` folder. You can link it normally 
-with any of your projects.
-
-   ```make includes```
-
-move the library headers in an `include` directory.
-
-   ```make clock```
-
-will build the included example.
-
-
-
-## Using the TEYE API (example)
-Here is a minimal example showing how the library is used (based on the existing code):
-
-```c
-#include "teye.h"
-
-int main(void) {
-    TEYE_Buffer buf = TEYE_init(160, 60); // create a buffer
-
-    // draw directly into buf.frame_buffer[y][x] using small integers as color indices
-    // (see src/teye.c for color table and rendering behavior)
-
-    TEYE_render_frame_mode_2(); // render to terminal
-
-    TEYE_free();
-    return 0;
-}
-```

@@ -1,7 +1,8 @@
 #include <signal.h>
 #include <stdio.h>
 
-#include "teye.h"
+#include <teye/teye.h>
+
 #include "timer.h"
 
 int running = 1;
@@ -21,11 +22,16 @@ int main() {
 
   signal(SIGINT, signalHandler);
 
-  TEYE_Buffer buffer = TEYE_init(w, h);
+  TEYE_Buffer buffer = {0};
+  
+  // Initialize the library
+  TEYE_init();
+
+  TEYE_allocate_buffer(&buffer, w, h);
 
   int frame_count = 0;
 
-  long frame_duration = 1000 / 10;
+  long frame_duration = 1000 / 60;
   long start = currentTimeMillis();
   long prev_time = start;
 
@@ -41,12 +47,14 @@ int main() {
     prev_time = current_time;
 
     update_frame(buffer);
+    TEYE_blit(buffer, Stretch, 0, 0, 1, 1);
 
-    TEYE_render_frame_mode_2();
+    TEYE_render_frame();
 
     frame_count++;
   }
 
+  TEYE_free_buffer(&buffer);
   TEYE_free();
 
   return 0;
@@ -110,7 +118,7 @@ void update_frame(TEYE_Buffer buffer) {
 
   // printf("%2d:%2d:%2d\n", hours, minutes, seconds);
 
-  TEYE_clear_buffer(0);
+  TEYE_clear_buffer(buffer, 0);
 
   int v_gap = (h - segment_size * 2) / 2;
   int h_gap = (w - segment_size * 8 - thickness * 5) / 2;
@@ -149,7 +157,7 @@ void update_frame(TEYE_Buffer buffer) {
       if (digit[seg]) {
         for (int x = segments[seg][0].x; x < segments[seg][1].x; x++) {
           for (int y = segments[seg][0].y; y < segments[seg][1].y; y++) {
-            buffer.frame_buffer[y + digit_y][x + digit_x] = 1;
+            set_buffer_pixel(buffer, x + digit_x, (y + digit_y), 1);
           }
         }
       }
@@ -166,7 +174,7 @@ void update_frame(TEYE_Buffer buffer) {
         for (int x = digit_x - thickness / 2; x < digit_x + thickness / 2;
              x++) {
           for (int y = y0 - thickness / 2; y < y0 + thickness / 2; y++) {
-            buffer.frame_buffer[y][x] = 1;
+            set_buffer_pixel(buffer, x, y, 1);
           }
         }
 
