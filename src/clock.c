@@ -6,7 +6,7 @@
 #include "timer.h"
 
 int running = 1;
-ushort FPS = 8;
+unsigned int FPS = 8;
 
 void update_frame(TEYE_Buffer buffer);
 
@@ -16,14 +16,14 @@ void signalHandler(int sig) {
   running = 0;
 }
 
-const ushort w = 400, h = 150;
+const unsigned short w = 400, h = 150;
 
 int main() {
 
   signal(SIGINT, signalHandler);
 
   TEYE_Buffer buffer = {0};
-  
+
   // Initialize the library
   TEYE_init();
 
@@ -47,7 +47,7 @@ int main() {
     prev_time = current_time;
 
     update_frame(buffer);
-    TEYE_blit(buffer, Stretch, 0, 0, 1, 1);
+    TEYE_blit(buffer, Stretch, 0, 0);
 
     TEYE_render_frame();
 
@@ -60,7 +60,7 @@ int main() {
   return 0;
 }
 
-void get_time(ushort *hours, ushort *minutes, ushort *seconds) {
+void get_time(int *hours, int *minutes, int *seconds) {
   long time = currentTimeMillis() / 1000;
 
   *seconds = time % 60;
@@ -73,13 +73,13 @@ void get_time(ushort *hours, ushort *minutes, ushort *seconds) {
 }
 
 typedef struct {
-  ushort x;
-  ushort y;
+  int x;
+  int y;
 } Point;
 
 /// some useful variables to draw the digits
-const ushort thickness = w / 60;
-const ushort segment_size = w / 10;
+const int thickness = w / 60;
+const int segment_size = w / 10;
 
 Point segments[][2] = {
     // shape (start and end point) of each segment in a digit
@@ -113,7 +113,7 @@ void update_frame(TEYE_Buffer buffer) {
   // We will show a very basic 7-seg type clock in the format hh:mm:ss
   // the first is to get the time right
 
-  ushort hours, minutes, seconds;
+  int hours, minutes, seconds;
   get_time(&hours, &minutes, &seconds);
 
   // printf("%2d:%2d:%2d\n", hours, minutes, seconds);
@@ -157,7 +157,7 @@ void update_frame(TEYE_Buffer buffer) {
       if (digit[seg]) {
         for (int x = segments[seg][0].x; x < segments[seg][1].x; x++) {
           for (int y = segments[seg][0].y; y < segments[seg][1].y; y++) {
-            set_buffer_pixel(buffer, x + digit_x, (y + digit_y), 1);
+            buffer.buffer[x + digit_x + (y + digit_y) * buffer.width] = 1;
           }
         }
       }
@@ -174,7 +174,7 @@ void update_frame(TEYE_Buffer buffer) {
         for (int x = digit_x - thickness / 2; x < digit_x + thickness / 2;
              x++) {
           for (int y = y0 - thickness / 2; y < y0 + thickness / 2; y++) {
-            set_buffer_pixel(buffer, x, y, 1);
+            buffer.buffer[x + digit_x + (y + digit_y) * buffer.width] = 1;
           }
         }
 

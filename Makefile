@@ -22,7 +22,7 @@ bin/%.o: ./src/%.c
 
 # Installation
 
-install-binaries:
+install:
 	cp -t /usr/local/bin $(BINARIES)
 
 clean:
